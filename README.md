@@ -7,7 +7,10 @@ It expects git tags defined with [semantic versioning 2.0.0](http://semver.org/)
 ### Usage
 
 The module expects the `PROJECT_NAME` and `GIT_EXECUTABLE` variables to be
-set, and once done will define the following variables:
+set. If git is not found, the module will try to read a VERSION file
+containing the full and partial versions.
+
+Once done, this module will define the following variables:
 
  * `${PROJECT_NAME}_VERSION_STRING` - Version string without metadata
 such as "v2.0.0" or "v.1.2.41-beta.1". This should correspond to the
