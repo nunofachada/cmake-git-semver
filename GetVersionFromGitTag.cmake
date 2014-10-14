@@ -3,9 +3,13 @@
 # variables by analysing the git tag and commit history. It expects git
 # tags defined with semantic versioning 2.0.0 (http://semver.org/).
 #
-# The module expects the PROJECT_NAME and GIT_EXECUTABLE variables to be
-# set. If Git is not found, the module will try to read a VERSION file
-# containing the full and partial versions.
+# The module expects the PROJECT_NAME variable to be set, and recognizes
+# the GIT_FOUND, GIT_EXECUTABLE and VERSION_UPDATE_FROM_GIT variables. 
+# If Git is found and VERSION_UPDATE_FROM_GIT is set to boolean TRUE, 
+# the project version will be updated using information fetched from the
+# most recent git tag and commit. Otherwise, the module will try to read
+# a VERSION file containing the full and partial versions. The module 
+# will update this file each time the project version is updated.
 #
 # Once done, this module will define the following variables:
 #
@@ -17,7 +21,7 @@
 # ${PROJECT_NAME}_VERSION_MAJOR - Major version integer (e.g. 2 in v2.3.1-RC.2+21.ef12c8)
 # ${PROJECT_NAME}_VERSION_MINOR - Minor version integer (e.g. 3 in v2.3.1-RC.2+21.ef12c8)
 # ${PROJECT_NAME}_VERSION_PATCH - Patch version integer (e.g. 1 in v2.3.1-RC.2+21.ef12c8)
-# ${PROJECT_NAME}_VERSION_TWEAK - Tweak version string (e.g. "RC-2" in v2.3.1-RC.2+21.ef12c8)
+# ${PROJECT_NAME}_VERSION_TWEAK - Tweak version string (e.g. "RC.2" in v2.3.1-RC.2+21.ef12c8)
 # ${PROJECT_NAME}_VERSION_AHEAD - How many commits ahead of last tag (e.g. 21 in v2.3.1-RC.2+21.ef12c8)
 # ${PROJECT_NAME}_VERSION_GIT_SHA - The git sha1 of the most recent commit (e.g. the "ef12c8" in v2.3.1-RC.2+21.ef12c8)
 #
@@ -26,7 +30,7 @@
 # Author: Nuno Fachada
 
 # Check if git is found...
-if (${GIT_FOUND})
+if (GIT_FOUND AND VERSION_UPDATE_FROM_GIT)
 
 	# Get last tag from git
 	execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 --tags
@@ -74,6 +78,7 @@ if (${GIT_FOUND})
 		${${PROJECT_NAME}_VERSION_STRING}+${${PROJECT_NAME}_VERSION_AHEAD}.${${PROJECT_NAME}_VERSION_GIT_SHA})
 
 	# Save version to file (which will be used when Git is not available
+	# or VERSION_UPDATE_FROM_GIT is disabled)
 	file(WRITE ${CMAKE_SOURCE_DIR}/VERSION ${${PROJECT_NAME}_VERSION_STRING_FULL}
 		"*" ${${PROJECT_NAME}_VERSION_STRING}
 		"*" ${${PROJECT_NAME}_VERSION_MAJOR}
@@ -82,7 +87,6 @@ if (${GIT_FOUND})
 		"*" ${${PROJECT_NAME}_VERSION_TWEAK}
 		"*" ${${PROJECT_NAME}_VERSION_AHEAD}
 		"*" ${${PROJECT_NAME}_VERSION_GIT_SHA})
-
 
 else()
 
